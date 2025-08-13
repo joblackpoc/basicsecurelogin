@@ -1,0 +1,22 @@
+# Run these commands to create and apply migrations
+
+# 1. Create migration for new model fields
+python manage.py makemigrations authentication
+
+# 2. Apply the migrations
+python manage.py migrate
+
+# 3. Create a superuser if you haven't already
+python manage.py create_admin --email admin@example.com --username admin --password your_secure_password
+
+# If you get any migration conflicts, you might need to:
+# python manage.py makemigrations authentication --merge
+
+# The migration will add these new fields to CustomUser:
+# - mfa_required (BooleanField)
+# - is_banned (BooleanField) 
+# - banned_at (DateTimeField)
+# - banned_by (ForeignKey)
+# - ban_reason (TextField)
+
+# And create the new UserActivityLog model

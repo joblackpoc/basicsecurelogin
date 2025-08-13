@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Approved - SecureLogin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #0d6efd, #198754);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0d6efd, #198754);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .success-icon {
+            font-size: 48px;
+            color: #28a745;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Account Approved!</h1>
+        </div>
+        
+        <div class="content">
+            <div class="success-icon">✅</div>
+            
+            <h2>Hello {{ user.first_name }}!</h2>
+            
+            <p>Great news! Your SecureLogin account has been approved by our administrators.</p>
+            
+            <p><strong>Account Details:</strong></p>
+            <ul>
+                <li><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</li>
+                <li><strong>Email:</strong> {{ user.email }}</li>
+                <li><strong>Username:</strong> {{ user.username }}</li>
+                <li><strong>Approved:</strong> {{ user.approved_at|date:"F d, Y H:i" }}</li>
+            </ul>
+            
+            <p>You can now log in to your account and start using our secure platform.</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ login_url }}" class="button">Login to Your Account</a>
+            </div>
+            
+            <h3>🔐 Security Features Available:</h3>
+            <ul>
+                <li><strong>Two-Factor Authentication:</strong> Enable MFA for enhanced security</li>
+                <li><strong>Login Monitoring:</strong> Track your account access</li>
+                <li><strong>Secure Sessions:</strong> Your sessions are protected with advanced security</li>
+            </ul>
+            
+            <p><strong>Next Steps:</strong></p>
+            <ol>
+                <li>Log in using your email and password</li>
+                <li>Complete your profile setup</li>
+                <li>Consider enabling Two-Factor Authentication</li>
+            </ol>
+        </div>
+        
+        <div class="footer">
+            <p>This email was sent from SecureLogin System.</p>
+            <p>If you have any questions, please contact our support team.</p>
+            <p>&copy; {{ "now"|date:"Y" }} SecureLogin. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

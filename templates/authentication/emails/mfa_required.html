@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Factor Authentication Required - {{ site_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .content {
+            color: #333;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 12px;
+            text-align: center;
+        }
+        .security-icon {
+            font-size: 48px;
+            color: #ffc107;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="security-icon">🔐</div>
+            <h1>Multi-Factor Authentication Required</h1>
+        </div>
+        
+        <div class="content">
+            <h2>Hello {{ user.first_name }},</h2>
+            
+            <p>For enhanced security, our administrators have required that you enable Multi-Factor Authentication (MFA) for your {{ site_name }} account.</p>
+            
+            <p><strong>Account Details:</strong></p>
+            <ul>
+                <li><strong>Email:</strong> {{ user.email }}</li>
+                <li><strong>Username:</strong> {{ user.username }}</li>
+                <li><strong>MFA Required Date:</strong> {{ "now"|date:"F d, Y at g:i A" }}</li>
+            </ul>
+            
+            <div class="info-box">
+                <h3>What is Multi-Factor Authentication?</h3>
+                <p>MFA adds an extra layer of security to your account by requiring a second form of verification (usually from your mobile phone) in addition to your password.</p>
+            </div>
+            
+            <p><strong>Next Steps:</strong></p>
+            <ol>
+                <li>Login to your account using your current credentials</li>
+                <li>You will be prompted to set up MFA</li>
+                <li>Install Google Authenticator or a similar app on your phone</li>
+                <li>Scan the QR code to link your account</li>
+                <li>Enter the verification code to complete setup</li>
+            </ol>
+            
+            <div style="text-align: center;">
+                <a href="{{ login_url }}" class="button">Login to Set Up MFA</a>
+            </div>
+            
+            <p><strong>Important:</strong> You will need to complete MFA setup before you can fully access your account.</p>
+            
+            <div class="info-box">
+                <h3>Recommended Authenticator Apps:</h3>
+                <ul>
+                    <li><strong>Google Authenticator</strong> - Available for iOS and Android</li>
+                    <li><strong>Authy</strong> - Cross-platform with cloud backup</li>
+                    <li><strong>Microsoft Authenticator</strong> - Multi-platform support</li>
+                </ul>
+            </div>
+            
+            <p>If you need assistance with setting up MFA, please contact our support team.</p>
+            
+            <p>Thank you for helping us keep your account secure.</p>
+            
+            <p>Best regards,<br>
+            The {{ site_name }} Security Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>This email was sent automatically. Please do not reply to this message.</p>
+            <p>© {{ "now"|date:"Y" }} {{ site_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecureLogin{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            color: #0d6efd !important;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #0d6efd, #198754);
+            color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0d6efd, #198754);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0b5ed7, #157347);
+        }
+        .alert {
+            border-radius: 10px;
+        }
+        .form-control {
+            border-radius: 8px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            min-height: 100vh;
+        }
+        .footer {
+            margin-top: auto;
+            background-color: #f8f9fa;
+            padding: 20px 0;
+        }
+        .status-badge {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+        .status-pending { background-color: #ffc107; color: #000; }
+        .status-approved { background-color: #28a745; color: #fff; }
+        .status-rejected { background-color: #dc3545; color: #fff; }
+        
+        /* Enhanced Activity Badges */
+        .activity-badge {
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .activity-login_success { background-color: #d4edda; color: #155724; }
+        .activity-login_failed { background-color: #f8d7da; color: #721c24; }
+        .activity-logout { background-color: #d1ecf1; color: #0c5460; }
+        .activity-mfa_enabled { background-color: #d4edda; color: #155724; }
+        .activity-mfa_disabled { background-color: #f8d7da; color: #721c24; }
+        .activity-password_change { background-color: #fff3cd; color: #856404; }
+        .activity-profile_update { background-color: #e2e3e5; color: #41464b; }
+        
+        /* Security Status Indicators */
+        .security-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .security-good { background-color: #28a745; }
+        .security-warning { background-color: #ffc107; }
+        .security-danger { background-color: #dc3545; }
+        
+        /* Admin Quick Links */
+        .admin-panel {
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .admin-panel a {
+            color: white;
+            text-decoration: none;
+        }
+        .admin-panel a:hover {
+            color: #f8f9fa;
+            text-decoration: underline;
+        }
+        
+        /* Enhanced Tables */
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+        
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+            margin-bottom: 20px;
+        }
+        .stats-card.success { border-left-color: #28a745; }
+        .stats-card.warning { border-left-color: #ffc107; }
+        .stats-card.danger { border-left-color: #dc3545; }
+        .stats-card.info { border-left-color: #17a2b8; }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        /* Navigation Enhancements */
+        .navbar-nav .nav-link {
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+        }
+        
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Responsive Improvements */
+        @media (max-width: 768px) {
+            .stats-card {
+                margin-bottom: 15px;
+            }
+            .card-body {
+                padding: 15px;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="d-flex flex-column">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-shield-alt me-2"></i>SecureLogin
+            </a>
+            
+            {% if user.is_authenticated %}
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'authentication:dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'authentication:profile' %}">
+                                <i class="fas fa-user me-1"></i>Profile
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="securityDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-lock me-1"></i>Security
+                            </a>
+                            <ul class="dropdown-menu">
+                                {% if user.mfa_enabled %}
+                                    <li><a class="dropdown-item" href="{% url 'authentication:mfa_disable' %}">
+                                        <i class="fas fa-mobile-alt me-2 text-danger"></i>Disable MFA
+                                    </a></li>
+                                {% else %}
+                                    <li><a class="dropdown-item" href="{% url 'authentication:mfa_setup' %}">
+                                        <i class="fas fa-mobile-alt me-2 text-success"></i>Enable MFA
+                                    </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="showSecurityTips()">
+                                    <i class="fas fa-lightbulb me-2 text-warning"></i>Security Tips
+                                </a></li>
+                            </ul>
+                        </li>
+                        
+                        {% if user.is_staff or user.is_superuser %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog me-1"></i>Admin
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/admin/">
+                                        <i class="fas fa-home me-2"></i>Admin Panel
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="/admin/auth/customuser/pending-users/">
+                                        <i class="fas fa-user-clock me-2 text-warning"></i>Pending Users
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="/admin/auth/customuser/security-dashboard/">
+                                        <i class="fas fa-shield-alt me-2 text-info"></i>Security Dashboard
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="/admin/authentication/bannedip/">
+                                        <i class="fas fa-ban me-2 text-danger"></i>Banned IPs
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="/admin/authentication/useractivity/">
+                                        <i class="fas fa-history me-2 text-primary"></i>User Activities
+                                    </a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'authentication:logout' %}">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <span class="navbar-text">
+                                <i class="fas fa-user-circle me-1"></i>{{ user.first_name }}
+                                {% if user.mfa_enabled %}
+                                    <span class="security-indicator security-good" title="MFA Enabled"></span>
+                                {% else %}
+                                    <span class="security-indicator security-warning" title="MFA Disabled"></span>
+                                {% endif %}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Admin Quick Panel for Staff -->
+    {% if user.is_authenticated and user.is_staff %}
+        <div class="container mt-3">
+            <div class="admin-panel">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-1">
+                            <i class="fas fa-crown me-2"></i>Admin Quick Access
+                        </h6>
+                        <small>Manage users, security, and system settings</small>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <a href="/admin/auth/customuser/pending-users/" class="btn btn-light btn-sm me-2">
+                            <i class="fas fa-user-clock me-1"></i>Pending
+                        </a>
+                        <a href="/admin/auth/customuser/security-dashboard/" class="btn btn-light btn-sm">
+                            <i class="fas fa-shield-alt me-1"></i>Security
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {% if message.tags == 'error' %}
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                    {% elif message.tags == 'success' %}
+                        <i class="fas fa-check-circle me-2"></i>
+                    {% elif message.tags == 'info' %}
+                        <i class="fas fa-info-circle me-2"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                    {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container my-4 flex-grow-1">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>SecureLogin System
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-0">
+                        <small class="text-muted">
+                            Powered by Django | 
+                            <i class="fas fa-lock me-1"></i>Enterprise Security
+                            {% if user.is_authenticated %}
+                                | Last Login: {{ user.last_login|date:"M d, Y H:i" }}
+                            {% endif %}
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Security Tips Modal -->
+    <div class="modal fade" id="securityTipsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-lightbulb me-2"></i>Security Tips
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Enable MFA:</strong> Use Google Authenticator for enhanced security
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Strong Passwords:</strong> Use 12+ characters with mixed case, numbers, and symbols
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Regular Logout:</strong> Always logout from shared computers
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Monitor Activity:</strong> Check your login history regularly
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Secure Network:</strong> Avoid public WiFi for sensitive operations
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-thumbs-up me-1"></i>Got it!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <!-- Toasts will be inserted here dynamically -->
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Security Tips Modal
+        function showSecurityTips() {
+            const modal = new bootstrap.Modal(document.getElementById('securityTipsModal'));
+            modal.show();
+        }
+        
+        // Enhanced Alert Auto-dismiss
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-dismiss success messages after 5 seconds
+            const successAlerts = document.querySelectorAll('.alert-success');
+            successAlerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+            
+            // Add loading states to forms
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                        submitBtn.disabled = true;
+                    }
+                });
+            });
+        });
+        
+        // Dynamic Toast Notifications
+        function showToast(message, type = 'info') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const toastHTML = `
+                <div id="${toastId}" class="toast" role="alert">
+                    <div class="toast-header">
+                        <i class="fas fa-info-circle text-${type} me-2"></i>
+                        <strong class="me-auto">SecureLogin</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">${message}</div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            
+            // Remove from DOM after hiding
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

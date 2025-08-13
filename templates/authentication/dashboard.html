@@ -1,0 +1,502 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - SecureLogin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            <small class="text-muted">Welcome back, {{ user.first_name }}!</small>
+        </h2>
+    </div>
+</div>
+
+<!-- Security Status Overview -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="stats-card {% if user.mfa_enabled and user.is_approved %}success{% elif user.mfa_enabled or user.is_approved %}warning{% else %}danger{% endif %}">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-1">
+                        <i class="fas fa-shield-alt me-2"></i>Account Security Status
+                    </h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge {% if user.is_approved %}bg-success{% else %}bg-warning{% endif %}">
+                            <i class="fas fa-user-check me-1"></i>{{ user.get_approval_status_display }}
+                        </span>
+                        <span class="badge {% if user.mfa_enabled %}bg-success{% else %}bg-warning{% endif %}">
+                            <i class="fas fa-mobile-alt me-1"></i>MFA {% if user.mfa_enabled %}Enabled{% else %}Disabled{% endif %}
+                        </span>
+                        <span class="badge {% if not user.is_locked %}bg-success{% else %}bg-danger{% endif %}">
+                            <i class="fas fa-lock me-1"></i>Account {% if user.is_locked %}Locked{% else %}Active{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    {% if not user.mfa_enabled %}
+                        <a href="{% url 'authentication:mfa_setup' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus me-1"></i>Enable MFA
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'authentication:profile' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-user-edit me-1"></i>Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- User Info Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user me-2"></i>Account Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-user-circle fa-4x text-primary mb-2"></i>
+                    <h6 class="mb-0">{{ user.first_name }} {{ user.last_name }}</h6>
+                    <small class="text-muted">{{ user.username }}</small>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-2">
+                    <strong>Email:</strong> 
+                    <small>{{ user.email }}</small>
+                </div>
+                <div class="mb-2">
+                    <strong>Phone:</strong> 
+                    <small>{{ user.phone_number|default:"Not provided" }}</small>
+                </div>
+                <div class="mb-2">
+                    <strong>Status:</strong> 
+                    <span class="status-badge status-{{ user.approval_status }}">
+                        {% if user.approval_status == 'approved' %}
+                            <i class="fas fa-check-circle me-1"></i>
+                        {% elif user.approval_status == 'pending' %}
+                            <i class="fas fa-clock me-1"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle me-1"></i>
+                        {% endif %}
+                        {{ user.get_approval_status_display }}
+                    </span>
+                </div>
+                <div class="mb-2">
+                    <strong>Member Since:</strong> 
+                    <small>{{ user.date_joined|date:"F d, Y" }}</small>
+                </div>
+                
+                {% if user.approved_by %}
+                    <div class="mb-2">
+                        <strong>Approved By:</strong> 
+                        <small>{{ user.approved_by.first_name }} {{ user.approved_by.last_name }}</small>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Approved On:</strong> 
+                        <small>{{ user.approved_at|date:"M d, Y" }}</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Security Status Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Security Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- MFA Status -->
+                <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded" 
+                     style="background-color: {% if user.mfa_enabled %}#d4edda{% else %}#fff3cd{% endif %};">
+                    <div>
+                        <strong>Two-Factor Authentication</strong><br>
+                        <small class="{% if user.mfa_enabled %}text-success{% else %}text-warning{% endif %}">
+                            {% if user.mfa_enabled %}
+                                <i class="fas fa-check-circle me-1"></i>Protected with MFA
+                            {% else %}
+                                <i class="fas fa-exclamation-triangle me-1"></i>Consider enabling MFA
+                            {% endif %}
+                        </small>
+                    </div>
+                    <div>
+                        {% if user.mfa_enabled %}
+                            <a href="{% url 'authentication:mfa_disable' %}" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-times me-1"></i>Disable
+                            </a>
+                        {% else %}
+                            <a href="{% url 'authentication:mfa_setup' %}" class="btn btn-sm btn-success">
+                                <i class="fas fa-plus me-1"></i>Enable
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Login Information -->
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="border-end">
+                            <h6 class="text-primary mb-1">{{ user.login_attempts }}</h6>
+                            <small class="text-muted">Failed Attempts</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-success mb-1">
+                            {% if user.last_login %}
+                                {{ user.last_login|timesince }} ago
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </h6>
+                        <small class="text-muted">Last Login</small>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-2">
+                    <strong>Last Login IP:</strong> 
+                    <code class="small">{{ user.last_login_ip|default:"Not available" }}</code>
+                </div>
+                
+                <div class="mb-2">
+                    <strong>Last Activity:</strong> 
+                    <small>{{ user.last_login|date:"M d, Y H:i"|default:"N/A" }}</small>
+                </div>
+                
+                {% if user.is_locked %}
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-lock me-2"></i>
+                        <strong>Account Locked</strong><br>
+                        <small>Until {{ user.locked_until|date:"M d, Y H:i" }}</small>
+                    </div>
+                {% else %}
+                    <div class="alert alert-success mb-0">
+                        <i class="fas fa-unlock me-2"></i>
+                        <strong>Account Active</strong><br>
+                        <small>No security restrictions</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'authentication:profile' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-edit me-2"></i>Update Profile
+                    </a>
+                    
+                    {% if not user.mfa_enabled %}
+                        <a href="{% url 'authentication:mfa_setup' %}" class="btn btn-outline-success">
+                            <i class="fas fa-mobile-alt me-2"></i>Setup Two-Factor Auth
+                        </a>
+                    {% else %}
+                        <a href="{% url 'authentication:mfa_disable' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-mobile-alt me-2"></i>Manage MFA Settings
+                        </a>
+                    {% endif %}
+                    
+                    <button class="btn btn-outline-info" onclick="showSecurityTips()">
+                        <i class="fas fa-lightbulb me-2"></i>Security Tips
+                    </button>
+                    
+                    <a href="{% url 'authentication:logout' %}" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Secure Logout
+                    </a>
+                </div>
+                
+                <hr class="my-3">
+                
+                <div class="text-center">
+                    <h6 class="text-muted mb-2">Security Score</h6>
+                    {% if user.mfa_enabled and user.is_approved %}
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 100%">Excellent</div>
+                        </div>
+                        <small class="text-success">
+                            <i class="fas fa-star me-1"></i>Your account is highly secure!
+                        </small>
+                    {% elif user.mfa_enabled or user.is_approved %}
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-warning" style="width: 70%">Good</div>
+                        </div>
+                        <small class="text-warning">
+                            <i class="fas fa-star-half-alt me-1"></i>Consider enabling all security features
+                        </small>
+                    {% else %}
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-danger" style="width: 40%">Needs Improvement</div>
+                        </div>
+                        <small class="text-danger">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Enable MFA for better security
+                        </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Login Attempts -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Recent Login Attempts
+                    </h5>
+                    <small class="text-muted">Last 10 attempts</small>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if recent_attempts %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="fas fa-calendar me-1"></i>Date/Time</th>
+                                    <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                                    <th><i class="fas fa-globe me-1"></i>IP Address</th>
+                                    <th><i class="fas fa-desktop me-1"></i>Device/Browser</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attempt in recent_attempts %}
+                                    <tr class="{% if not attempt.success %}table-warning{% endif %}">
+                                        <td>
+                                            <strong>{{ attempt.timestamp|date:"M d, Y" }}</strong><br>
+                                            <small class="text-muted">{{ attempt.timestamp|date:"H:i:s" }}</small>
+                                        </td>
+                                        <td>
+                                            {% if attempt.success %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Success
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times me-1"></i>Failed
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <code class="small">{{ attempt.ip_address }}</code>
+                                            {% if attempt.ip_address == user.last_login_ip %}
+                                                <small class="text-success ms-1">(Current)</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {% if attempt.user_agent %}
+                                                    {{ attempt.user_agent|truncatechars:60 }}
+                                                {% else %}
+                                                    Not available
+                                                {% endif %}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p class="mb-0">No recent login attempts found.</p>
+                        <small>Login attempts will appear here once you start using the system.</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Account Activities -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Recent Account Activities
+                    </h5>
+                    <small class="text-muted">Your activity timeline</small>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if recent_activities %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="fas fa-clock me-1"></i>Date/Time</th>
+                                    <th><i class="fas fa-tag me-1"></i>Activity</th>
+                                    <th><i class="fas fa-map-marker-alt me-1"></i>Location</th>
+                                    <th><i class="fas fa-info me-1"></i>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in recent_activities %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ activity.timestamp|date:"M d, Y" }}</strong><br>
+                                            <small class="text-muted">{{ activity.timestamp|date:"H:i:s" }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="activity-badge activity-{{ activity.action|lower }}">
+                                                {{ activity.get_action_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if activity.ip_address %}
+                                                <code class="small">{{ activity.ip_address }}</code>
+                                            {% else %}
+                                                <span class="text-muted">System</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {% if activity.details %}
+                                                    {{ activity.details|truncatechars:80 }}
+                                                {% else %}
+                                                    {{ activity.get_action_display }} completed
+                                                {% endif %}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        {% if user.is_staff %}
+                            <a href="/admin/authentication/useractivity/?user__id__exact={{ user.id }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-external-link-alt me-1"></i>View Complete Activity Log
+                            </a>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <p class="mb-0">No recent activities found.</p>
+                        <small>Your account activities will appear here as you use the system.</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Security Recommendations Modal (triggered by base.html) -->
+<div class="modal fade" id="securityRecommendationsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-shield-alt me-2"></i>Security Recommendations
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-success">✓ What You're Doing Right</h6>
+                        <ul class="list-unstyled">
+                            {% if user.is_approved %}
+                                <li class="mb-1">
+                                    <i class="fas fa-check text-success me-2"></i>Account is approved
+                                </li>
+                            {% endif %}
+                            {% if user.mfa_enabled %}
+                                <li class="mb-1">
+                                    <i class="fas fa-check text-success me-2"></i>Two-factor authentication enabled
+                                </li>
+                            {% endif %}
+                            {% if user.last_login %}
+                                <li class="mb-1">
+                                    <i class="fas fa-check text-success me-2"></i>Regular account usage
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-warning">⚠️ Areas for Improvement</h6>
+                        <ul class="list-unstyled">
+                            {% if not user.mfa_enabled %}
+                                <li class="mb-1">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    <a href="{% url 'authentication:mfa_setup' %}">Enable two-factor authentication</a>
+                                </li>
+                            {% endif %}
+                            {% if not user.phone_number %}
+                                <li class="mb-1">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    <a href="{% url 'authentication:profile' %}">Add phone number to profile</a>
+                                </li>
+                            {% endif %}
+                            {% if user.login_attempts > 0 %}
+                                <li class="mb-1">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Monitor recent failed login attempts
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="alert alert-info">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-lightbulb me-2"></i>Pro Security Tips
+                    </h6>
+                    <ul class="mb-0">
+                        <li>Use a unique, strong password for this account</li>
+                        <li>Never share your login credentials with others</li>
+                        <li>Always logout when using shared computers</li>
+                        <li>Regularly review your account activity</li>
+                        <li>Report suspicious activity immediately</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="fas fa-thumbs-up me-1"></i>Keep My Account Secure!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-show security recommendations for users without MFA
+{% if not user.mfa_enabled %}
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show recommendations modal after 3 seconds for users without MFA
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('securityRecommendationsModal'));
+            modal.show();
+        }, 3000);
+    });
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - SecureLogin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-user me-2"></i>User Profile
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-edit me-2"></i>Personal Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>First Name:</strong></div>
+                    <div class="col-sm-9">{{ user.first_name }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Last Name:</strong></div>
+                    <div class="col-sm-9">{{ user.last_name }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Username:</strong></div>
+                    <div class="col-sm-9">{{ user.username }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Email:</strong></div>
+                    <div class="col-sm-9">{{ user.email }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Phone:</strong></div>
+                    <div class="col-sm-9">{{ user.phone_number|default:"Not provided" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Member Since:</strong></div>
+                    <div class="col-sm-9">{{ user.date_joined|date:"F d, Y" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Security Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-check-circle me-2 text-success"></i>Account Status</span>
+                        <span class="status-badge status-{{ user.approval_status }}">
+                            {{ user.get_approval_status_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-mobile-alt me-2"></i>Two-Factor Auth</span>
+                        {% if user.mfa_enabled %}
+                            <span class="badge bg-success">Enabled</span>
+                        {% else %}
+                            <span class="badge bg-warning">Disabled</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-clock me-2"></i>Last Login</span>
+                        <small class="text-muted">{{ user.last_login|date:"M d, Y H:i" }}</small>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-globe me-2"></i>Last IP</span>
+                        <code>{{ user.last_login_ip|default:"N/A" }}</code>
+                    </div>
+                </div>
+                
+                {% if user.approved_by %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-user-check me-2"></i>Approved By</span>
+                            <small class="text-muted">{{ user.approved_by.first_name }} {{ user.approved_by.last_name }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-calendar me-2"></i>Approved On</span>
+                            <small class="text-muted">{{ user.approved_at|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    {% if not user.mfa_enabled %}
+                        <a href="{% url 'authentication:mfa_setup' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-mobile-alt me-2"></i>Enable MFA
+                        </a>
+                    {% else %}
+                        <a href="{% url 'authentication:mfa_disable' %}" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-times me-2"></i>Disable MFA
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'authentication:dashboard' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-tachometer-alt me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

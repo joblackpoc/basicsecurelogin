@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Disable MFA - SecureLogin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-header text-center py-4 bg-warning">
+                <h3 class="mb-0 text-dark">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Disable Two-Factor Authentication
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    <strong>Security Warning:</strong> Disabling two-factor authentication will reduce your account security.
+                </div>
+                
+                <div class="text-center mb-4">
+                    <i class="fas fa-mobile-alt fa-3x text-warning mb-3"></i>
+                    <p>
+                        Are you sure you want to disable two-factor authentication for your account?
+                        This will remove all authenticator devices and reduce your account security.
+                    </p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="fas fa-times me-2"></i>Yes, Disable MFA
+                        </button>
+                        <a href="{% url 'authentication:dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body text-center">
+                <h6 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>What happens when you disable MFA?
+                </h6>
+                <ul class="list-unstyled text-start">
+                    <li><i class="fas fa-check text-muted me-2"></i>All authenticator devices will be removed</li>
+                    <li><i class="fas fa-check text-muted me-2"></i>You'll only need your password to login</li>
+                    <li><i class="fas fa-check text-muted me-2"></i>You can re-enable MFA anytime</li>
+                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Your account will be less secure</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}MFA Verification - SecureLogin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-header text-center py-4">
+                <h3 class="mb-0">
+                    <i class="fas fa-mobile-alt me-2"></i>Two-Factor Authentication
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                    <p class="mb-0">
+                        Enter the 6-digit code from your authenticator app to complete the login process.
+                    </p>
+                </div>
+                
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.otp_token.id_for_label }}" class="form-label text-center w-100">
+                            <i class="fas fa-key me-2"></i>{{ form.otp_token.label }}
+                        </label>
+                        {{ form.otp_token }}
+                        {% if form.otp_token.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.otp_token.errors %}
+                                    <small><i class="fas fa-exclamation-triangle me-1"></i>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check me-2"></i>Verify & Login
+                        </button>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{% url 'authentication:login' %}" class="text-decoration-none text-muted">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Login
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body text-center">
+                <h6 class="card-title">
+                    <i class="fas fa-question-circle me-2"></i>Need Help?
+                </h6>
+                <p class="card-text">
+                    <small class="text-muted">
+                        If you don't have access to your authenticator app, please contact support.
+                        <br>
+                        <i class="fas fa-clock me-1"></i>Codes refresh every 30 seconds.
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tokenInput = document.querySelector('#id_otp_token');
+    if (tokenInput) {
+        tokenInput.focus();
+        
+        // Format token input and handle input
+        tokenInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove all non-digits
+            
+            // Limit to 6 digits
+            if (value.length > 6) {
+                value = value.substring(0, 6);
+            }
+            
+            // Add space after 3rd digit for readability
+            if (value.length > 3) {
+                value = value.substring(0, 3) + ' ' + value.substring(3);
+            }
+            
+            e.target.value = value;
+            
+            // Auto-submit when 6 digits are entered
+            let digitsOnly = value.replace(/\D/g, '');
+            if (digitsOnly.length === 6) {
+                // Small delay to allow user to see the complete code
+                setTimeout(() => {
+                    e.target.closest('form').submit();
+                }, 500);
+            }
+        });
+        
+        // Only allow numbers and handle special keys
+        tokenInput.addEventListener('keypress', function(e) {
+            if (!/\d/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
