@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Server Error - SecureLogin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-server me-2"></i>500 - Server Error
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h2 class="text-danger mb-3">Internal Server Error</h2>
+                <p class="lead text-muted mb-4">
+                    We're experiencing technical difficulties. Our server encountered an unexpected error while processing your request.
+                </p>
+                
+                <div class="alert alert-danger mb-4">
+                    <i class="fas fa-tools me-2"></i>
+                    <strong>What happened?</strong>
+                    <ul class="list-unstyled mt-2 mb-0 text-start">
+                        <li><i class="fas fa-dot-circle me-2"></i>An unexpected server error occurred</li>
+                        <li><i class="fas fa-dot-circle me-2"></i>Our technical team has been automatically notified</li>
+                        <li><i class="fas fa-dot-circle me-2"></i>We're working to resolve this issue</li>
+                    </ul>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <button onclick="window.location.reload()" class="btn btn-outline-primary">
+                        <i class="fas fa-redo me-2"></i>Try Again
+                    </button>
+                    <button onclick="window.history.back()" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Go Back
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Go Home
+                    </a>
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>Temporary Issue:</strong> Please try again in a few moments. If the problem persists, contact support.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-life-ring me-2"></i>Need Immediate Help?
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-phone me-2"></i>Contact Support</h6>
+                        <p class="text-muted">If you need immediate assistance:</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-1"><i class="fas fa-envelope me-2 text-primary"></i>Email: support@securelogin.com</li>
+                            <li class="mb-1"><i class="fas fa-phone me-2 text-success"></i>Phone: +1-XXX-XXX-XXXX</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-info-circle me-2"></i>Error Details</h6>
+                        <p class="text-muted">When contacting support, please provide:</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-1"><i class="fas fa-clock me-2 text-info"></i>Time: <code>{{ request_time|default:"Just now" }}</code></li>
+                            <li class="mb-1"><i class="fas fa-link me-2 text-info"></i>URL: <code>{{ request.path|default:"N/A" }}</code></li>
+                            <li class="mb-1"><i class="fas fa-hashtag me-2 text-info"></i>Error ID: <code>#{{ error_id|default:"SERVER_ERROR_500" }}</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Security Notice
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">
+                    <i class="fas fa-lock me-2 text-success"></i>
+                    Your data remains secure. This error does not affect the security of your account or personal information.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh after 30 seconds
+setTimeout(function() {
+    const refreshBtn = document.querySelector('button[onclick="window.location.reload()"]');
+    if (refreshBtn) {
+        refreshBtn.innerHTML = '<i class="fas fa-redo fa-spin me-2"></i>Auto-refreshing...';
+        setTimeout(() => window.location.reload(), 2000);
+    }
+}, 30000);
+</script>
+{% endblock %}

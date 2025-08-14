@@ -1,0 +1,3 @@
+WARNING 2025-08-14 15:43:32,788 error_views 23580 23688 Bad request from 127.0.0.1: /test-path
+WARNING 2025-08-14 15:43:32,809 error_views 23580 23688 Forbidden access attempt - User: joblackpoc@gmail.com (Approved) - IP: 127.0.0.1 - Path: /test-path
+ERROR 2025-08-14 15:43:32,834 error_views 23580 23688 Server Error 500_5F67FA30 - IP: 127.0.0.1 - Path: /test-path

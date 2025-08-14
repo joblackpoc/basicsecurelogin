@@ -15,7 +15,7 @@ import qrcode
 import io
 import base64
 import logging
-from .forms import CustomUserRegistrationForm, CustomLoginForm, TOTPSetupForm, TOTPVerificationForm
+from .forms import CustomUserRegistrationForm, CustomLoginForm, TOTPSetupForm, TOTPVerificationForm, ProfileUpdateForm
 from .models import CustomUser, LoginAttempt, UserActivity
 
 logger = logging.getLogger(__name__)
@@ -348,3 +348,64 @@ def mfa_disable_view(request):
 def profile_view(request):
     """User profile view."""
     return render(request, 'authentication/profile.html', {'user': request.user})
+
+
+@login_required
+@ratelimit(key='user', rate='5/5m', method='POST', block=True)
+def profile_update_view(request):
+    """User profile update view with CRUD operations."""
+    
+    # Security check: Prevent banned users from updating profile
+    if request.user.is_banned:
+        messages.error(request, 'Account is banned. Profile updates are not allowed.')
+        return redirect('authentication:profile')
+    
+    # Security check: Ensure account is approved (for regular users)
+    if not request.user.is_staff and not request.user.is_superuser and not request.user.is_approved():
+        messages.error(request, 'Profile updates are only available for approved accounts.')
+        return redirect('authentication:profile')
+    
+    # Security check: Prevent too frequent updates (once every 5 minutes for regular users)
+    if not request.user.is_staff and not request.user.is_superuser:
+        recent_update = UserActivity.objects.filter(
+            user=request.user,
+            action='PROFILE_UPDATE',
+            timestamp__gte=timezone.now() - timezone.timedelta(minutes=5)
+        ).exists()
+        
+        if recent_update:
+            messages.warning(request, 'You can only update your profile once every 5 minutes. Please try again later.')
+            return redirect('authentication:profile')
+    
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, instance=request.user, user=request.user)
+        if form.is_valid():
+            # Log the profile update attempt
+            old_values = {
+                'first_name': request.user.first_name,
+                'last_name': request.user.last_name,
+                'username': request.user.username,
+                'phone_number': request.user.phone_number,
+            }
+            
+            # Save the updated profile
+            updated_user = form.save()
+            
+            # Log the successful profile update
+            UserActivity.objects.create(
+                user=request.user,
+                action='PROFILE_UPDATE',
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                details=f"Profile updated. Changed fields: {', '.join([k for k in old_values.keys() if old_values[k] != getattr(updated_user, k)])}"
+            )
+            
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('authentication:profile')
+    else:
+        form = ProfileUpdateForm(instance=request.user, user=request.user)
+    
+    return render(request, 'authentication/profile_update.html', {
+        'form': form,
+        'user': request.user
+    })

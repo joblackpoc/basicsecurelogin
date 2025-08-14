@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Forbidden - SecureLogin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="fas fa-ban me-2"></i>403 - Access Forbidden
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-shield-alt text-warning" style="font-size: 4rem;"></i>
+                </div>
+                <h2 class="text-warning mb-3">Access Denied</h2>
+                <p class="lead text-muted mb-4">
+                    You don't have permission to access this resource. This might be because:
+                </p>
+                <ul class="list-unstyled text-start mb-4">
+                    <li class="mb-2"><i class="fas fa-dot-circle text-warning me-2"></i>Your account lacks sufficient privileges</li>
+                    <li class="mb-2"><i class="fas fa-dot-circle text-warning me-2"></i>Your account is pending approval</li>
+                    <li class="mb-2"><i class="fas fa-dot-circle text-warning me-2"></i>You've been temporarily restricted</li>
+                    <li class="mb-2"><i class="fas fa-dot-circle text-warning me-2"></i>The resource requires admin access</li>
+                </ul>
+                
+                {% if user.is_authenticated %}
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-user me-2"></i>
+                        <strong>Current Status:</strong>
+                        <span class="status-badge status-{{ user.approval_status }} ms-2">
+                            {{ user.get_approval_status_display }}
+                        </span>
+                        {% if user.is_banned %}
+                            <br><small class="text-danger mt-1">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Your account has been restricted.
+                            </small>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <button onclick="window.history.back()" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Go Back
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Go Home
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'authentication:dashboard' %}" class="btn btn-success">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{% url 'authentication:login' %}" class="btn btn-success">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                    {% endif %}
+                </div>
+                
+                {% if not user.is_authenticated %}
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Not logged in?</strong> Please log in to access protected resources.
+                    </div>
+                {% elif user.approval_status == 'pending' %}
+                    <div class="alert alert-warning mt-4">
+                        <i class="fas fa-clock me-2"></i>
+                        <strong>Account Pending:</strong> Your account is awaiting administrator approval.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i>Need Access?
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>If you believe you should have access to this resource:</p>
+                <ul class="list-unstyled">
+                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Contact your administrator</li>
+                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Wait for account approval if pending</li>
+                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Ensure you're logged in with the correct account</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

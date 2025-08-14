@@ -12,6 +12,7 @@ urlpatterns = [
     # User Dashboard and Profile URLs
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('profile/', views.profile_view, name='profile'),
+    path('profile/update/', views.profile_update_view, name='profile_update'),
     
     # Multi-Factor Authentication URLs
     path('mfa/setup/', views.mfa_setup_view, name='mfa_setup'),

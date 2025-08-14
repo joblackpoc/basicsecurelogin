@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found - SecureLogin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-search me-2"></i>404 - Page Not Found
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-map-marked-alt text-info" style="font-size: 4rem;"></i>
+                </div>
+                <h2 class="text-info mb-3">Oops! Page Not Found</h2>
+                <p class="lead text-muted mb-4">
+                    The page you're looking for doesn't exist or has been moved. This could happen because:
+                </p>
+                <ul class="list-unstyled text-start mb-4">
+                    <li class="mb-2"><i class="fas fa-dot-circle text-info me-2"></i>The URL was typed incorrectly</li>
+                    <li class="mb-2"><i class="fas fa-dot-circle text-info me-2"></i>The page has been removed or relocated</li>
+                    <li class="mb-2"><i class="fas fa-dot-circle text-info me-2"></i>The link you followed is broken</li>
+                    <li class="mb-2"><i class="fas fa-dot-circle text-info me-2"></i>You don't have access to this resource</li>
+                </ul>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <button onclick="window.history.back()" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Go Back
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Go Home
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'authentication:dashboard' %}" class="btn btn-success">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <div class="alert alert-light mt-4">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Tip:</strong> Use the navigation menu above to find what you're looking for.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-sitemap me-2"></i>Quick Navigation
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if user.is_authenticated %}
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-user me-2"></i>Account</h6>
+                            <ul class="list-unstyled">
+                                <li><a href="{% url 'authentication:dashboard' %}" class="text-decoration-none">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a></li>
+                                <li><a href="{% url 'authentication:profile' %}" class="text-decoration-none">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </a></li>
+                                <li><a href="{% url 'authentication:mfa_setup' %}" class="text-decoration-none">
+                                    <i class="fas fa-mobile-alt me-2"></i>Security Settings
+                                </a></li>
+                            </ul>
+                        </div>
+                        {% if user.is_staff %}
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-cog me-2"></i>Admin</h6>
+                                <ul class="list-unstyled">
+                                    <li><a href="/secure-admin/" class="text-decoration-none">
+                                        <i class="fas fa-home me-2"></i>Admin Panel
+                                    </a></li>
+                                    <li><a href="/secure-admin/authentication/customuser/pending-users/" class="text-decoration-none">
+                                        <i class="fas fa-user-clock me-2"></i>Pending Users
+                                    </a></li>
+                                    <li><a href="/secure-admin/authentication/customuser/security-dashboard/" class="text-decoration-none">
+                                        <i class="fas fa-shield-alt me-2"></i>Security Dashboard
+                                    </a></li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-sign-in-alt me-2"></i>Get Started</h6>
+                            <ul class="list-unstyled">
+                                <li><a href="{% url 'authentication:login' %}" class="text-decoration-none">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                                </a></li>
+                                <li><a href="{% url 'authentication:register' %}" class="text-decoration-none">
+                                    <i class="fas fa-user-plus me-2"></i>Register
+                                </a></li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

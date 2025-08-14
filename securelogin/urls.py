@@ -19,12 +19,23 @@ from django.urls import path, include
 from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
+from . import error_views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
+    path('secure-admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('', lambda request: redirect('authentication:login'), name='home'),
 ]
+
+# Error testing URLs (only available in DEBUG mode)
+if settings.DEBUG:
+    urlpatterns += [
+        path('test-errors/400/', error_views.test_error_400, name='test_error_400'),
+        path('test-errors/403/', error_views.test_error_403, name='test_error_403'),
+        path('test-errors/404/', error_views.test_error_404, name='test_error_404'),
+        path('test-errors/500/', error_views.test_error_500, name='test_error_500'),
+    ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

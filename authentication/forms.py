@@ -204,3 +204,89 @@ class TOTPVerificationForm(forms.Form):
             
             return clean_token
         return token
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    first_name = forms.CharField(
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'First Name'
+        })
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Last Name'
+        })
+    )
+    username = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Username'
+        }),
+        help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+    )
+    phone_number = forms.CharField(
+        max_length=15,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Phone Number (optional)'
+        })
+    )
+    
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'username', 'phone_number']
+    
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username and self.user:
+            # Check if username is being changed and if it already exists
+            if username != self.user.username:
+                if CustomUser.objects.filter(username=username).exists():
+                    raise ValidationError("A user with this username already exists.")
+        return username
+    
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get('phone_number')
+        if phone_number:
+            # Basic phone number validation
+            import re
+            # Remove all non-digit characters for validation
+            clean_phone = re.sub(r'\D', '', phone_number)
+            if clean_phone and (len(clean_phone) < 10 or len(clean_phone) > 15):
+                raise ValidationError("Please enter a valid phone number (10-15 digits).")
+        return phone_number
+    
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if first_name:
+            # Sanitize and validate first name
+            import re
+            if not re.match(r'^[a-zA-Z\s\-\'\.]+$', first_name):
+                raise ValidationError("First name can only contain letters, spaces, hyphens, apostrophes, and periods.")
+            if len(first_name.strip()) < 1:
+                raise ValidationError("First name cannot be empty or just spaces.")
+        return first_name.strip() if first_name else first_name
+    
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if last_name:
+            # Sanitize and validate last name
+            import re
+            if not re.match(r'^[a-zA-Z\s\-\'\.]+$', last_name):
+                raise ValidationError("Last name can only contain letters, spaces, hyphens, apostrophes, and periods.")
+            if len(last_name.strip()) < 1:
+                raise ValidationError("Last name cannot be empty or just spaces.")
+        return last_name.strip() if last_name else last_name

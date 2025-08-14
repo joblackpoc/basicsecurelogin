@@ -1,144 +1,384 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Denied - SecureLogin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #dc3545, #ffc107);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: Arial, sans-serif;
-        }
+{% extends 'base.html' %}
+
+{% block title %}Access Denied - SecureLogin{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #dc3545, #ffc107);
+        min-height: 100vh;
+    }
+    
+    .banned-container {
+        background: white;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto;
+        margin-top: 50px;
+    }
+    
+    .banned-icon {
+        font-size: 80px;
+        color: #dc3545;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .banned-title {
+        color: #dc3545;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    
+    .ip-address {
+        background: #f8f9fa;
+        border: 2px solid #dc3545;
+        border-radius: 8px;
+        padding: 15px;
+        font-family: monospace;
+        font-size: 18px;
+        margin: 20px 0;
+        color: #dc3545;
+        font-weight: bold;
+        display: inline-block;
+        min-width: 200px;
+    }
+    
+    .alert-banned {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    
+    .contact-info {
+        background: #e9ecef;
+        border-radius: 8px;
+        padding: 25px;
+        margin-top: 30px;
+        text-align: left;
+    }
+    
+    .contact-info h5 {
+        color: #495057;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    .contact-info p {
+        margin-bottom: 8px;
+        color: #6c757d;
+    }
+    
+    .contact-detail {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 8px;
+        background: white;
+        border-radius: 5px;
+    }
+    
+    .contact-detail i {
+        margin-right: 10px;
+        color: #007bff;
+        width: 20px;
+    }
+    
+    .security-tips {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: left;
+    }
+    
+    .security-tips h6 {
+        color: #856404;
+        margin-bottom: 15px;
+        text-align: center;
+        font-weight: bold;
+    }
+    
+    .security-tips ul {
+        color: #856404;
+        margin-bottom: 0;
+        padding-left: 20px;
+    }
+    
+    .security-tips li {
+        margin-bottom: 8px;
+    }
+    
+    .action-buttons {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-home {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .btn-home:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-contact {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .btn-contact:hover {
+        background: linear-gradient(135deg, #1e7e34, #155724);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .warning-text {
+        background: #dc3545;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        font-weight: bold;
+        display: inline-block;
+    }
+    
+    .info-footer {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #dee2e6;
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
         .banned-container {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
+            margin: 20px;
+            padding: 30px 20px;
         }
+        
         .banned-icon {
-            font-size: 80px;
-            color: #dc3545;
-            margin-bottom: 20px;
+            font-size: 60px;
         }
+        
         .banned-title {
-            color: #dc3545;
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 20px;
+            font-size: 24px;
         }
+        
         .ip-address {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 18px;
-            margin: 20px 0;
-            color: #dc3545;
-            font-weight: bold;
+            font-size: 16px;
+            padding: 12px;
         }
-        .contact-info {
-            background: #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-        .contact-info h5 {
-            color: #495057;
-            margin-bottom: 15px;
-        }
-        .contact-info p {
-            margin-bottom: 5px;
-            color: #6c757d;
-        }
-        .security-tips {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-            text-align: left;
-        }
-        .security-tips h6 {
-            color: #856404;
-            margin-bottom: 10px;
-        }
-        .security-tips ul {
-            color: #856404;
-            margin-bottom: 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="banned-container">
-        <div class="banned-icon">
-            <i class="fas fa-ban"></i>
-        </div>
         
-        <h1 class="banned-title">
-            <i class="fas fa-shield-alt me-2"></i>
-            Access Denied
-        </h1>
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
         
-        <p class="lead text-muted">
-            {{ message }}
-        </p>
+        .btn-home, .btn-contact {
+            width: 200px;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="banned-container">
+    <div class="banned-icon">
+        <i class="fas fa-ban"></i>
+    </div>
+    
+    <h1 class="banned-title">
+        <i class="fas fa-shield-alt me-2"></i>
+        Access Denied
+    </h1>
+    
+    <p class="lead text-muted mb-4">
+        {{ message|default:"Your IP address has been banned due to suspicious activity or security violations." }}
+    </p>
+    
+    <div class="warning-text">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        SECURITY RESTRICTION ACTIVE
+    </div>
+    
+    <div class="ip-address">
+        <i class="fas fa-globe me-2"></i>
+        Your IP: {{ ip_address }}
+    </div>
+    
+    <div class="alert-banned">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Security Notice:</strong> This IP address has been temporarily or permanently blocked due to suspicious activity detected by our security systems.
+    </div>
+    
+    <div class="security-tips">
+        <h6><i class="fas fa-lightbulb me-2"></i>Common Reasons for IP Restrictions:</h6>
+        <ul>
+            <li><strong>Multiple failed login attempts</strong> - Too many incorrect password attempts</li>
+            <li><strong>Automated attacks or bot activity</strong> - Suspicious automated behavior detected</li>
+            <li><strong>Violation of terms of service</strong> - Activities that violate our usage policies</li>
+            <li><strong>Suspicious or malicious behavior</strong> - Patterns indicating potential security threats</li>
+            <li><strong>Geographic restrictions</strong> - Access from restricted regions</li>
+        </ul>
+    </div>
+    
+    <div class="contact-info">
+        <h5><i class="fas fa-headset me-2"></i>Need Assistance?</h5>
+        <p class="text-center mb-3"><strong>If you believe this restriction is an error, please contact our support team:</strong></p>
         
-        <div class="ip-address">
-            <i class="fas fa-globe me-2"></i>
-            Your IP: {{ ip_address }}
-        </div>
-        
-        <div class="alert alert-danger" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Security Notice:</strong> This IP address has been temporarily or permanently blocked due to suspicious activity or security violations.
-        </div>
-        
-        <div class="security-tips">
-            <h6><i class="fas fa-lightbulb me-2"></i>Common Reasons for IP Bans:</h6>
-            <ul class="text-start">
-                <li>Multiple failed login attempts</li>
-                <li>Automated attacks or bot activity</li>
-                <li>Violation of terms of service</li>
-                <li>Suspicious or malicious behavior</li>
-            </ul>
-        </div>
-        
-        <div class="contact-info">
-            <h5><i class="fas fa-headset me-2"></i>Need Help?</h5>
-            <p><strong>If you believe this is an error, please contact our support team:</strong></p>
-            <p><i class="fas fa-envelope me-2"></i>Email: support@securelogin.com</p>
-            <p><i class="fas fa-phone me-2"></i>Phone: +1 (555) 123-4567</p>
-            <p><i class="fas fa-clock me-2"></i>Support Hours: 24/7</p>
-            
-            <div class="mt-3">
-                <small class="text-muted">
-                    Please include your IP address ({{ ip_address }}) when contacting support.
-                </small>
+        <div class="contact-detail">
+            <i class="fas fa-envelope"></i>
+            <div>
+                <strong>Email:</strong> support@securelogin.com<br>
+                <small class="text-muted">Response time: 1-2 business hours</small>
             </div>
         </div>
         
-        <div class="mt-4">
-            <a href="/" class="btn btn-outline-primary">
-                <i class="fas fa-home me-2"></i>Return to Homepage
-            </a>
+        <div class="contact-detail">
+            <i class="fas fa-phone"></i>
+            <div>
+                <strong>Phone:</strong> +1 (555) 123-4567<br>
+                <small class="text-muted">Available 24/7 for urgent security matters</small>
+            </div>
         </div>
         
-        <div class="mt-3">
+        <div class="contact-detail">
+            <i class="fas fa-clock"></i>
+            <div>
+                <strong>Support Hours:</strong> 24/7<br>
+                <small class="text-muted">Emergency support always available</small>
+            </div>
+        </div>
+        
+        <div class="contact-detail">
+            <i class="fas fa-ticket-alt"></i>
+            <div>
+                <strong>Support Ticket:</strong> Create a ticket online<br>
+                <small class="text-muted">Include your IP address: <code>{{ ip_address }}</code></small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="action-buttons">
+        <a href="/" class="btn-home">
+            <i class="fas fa-home me-2"></i>Return to Homepage
+        </a>
+        <a href="mailto:support@securelogin.com?subject=IP Restriction Appeal - {{ ip_address }}&body=Hello Support Team,%0D%0A%0D%0AMy IP address {{ ip_address }} has been restricted and I believe this is an error.%0D%0A%0D%0APlease review and consider removing this restriction.%0D%0A%0D%0AThank you." class="btn-contact">
+            <i class="fas fa-envelope me-2"></i>Contact Support
+        </a>
+    </div>
+    
+    <div class="info-footer">
+        <p class="mb-1">
+            <i class="fas fa-info-circle me-1"></i>
+            <strong>Security Information:</strong>
+        </p>
+        <ul class="list-unstyled small">
+            <li>• This security measure helps protect our platform and users</li>
+            <li>• IP restrictions are automatically applied based on behavior analysis</li>
+            <li>• Legitimate users can request review through our support channels</li>
+            <li>• All security events are logged for review and appeals</li>
+        </ul>
+        
+        <div class="mt-3 pt-3 border-top">
             <small class="text-muted">
-                <i class="fas fa-info-circle me-1"></i>
-                This security measure helps protect our platform and users.
+                <strong>Incident ID:</strong> BAN-{{ ip_address|default:"UNKNOWN" }}-{{ "now"|date:"YmdHis" }}<br>
+                <strong>Timestamp:</strong> {{ "now"|date:"Y-m-d H:i:s T" }}<br>
+                <strong>Server:</strong> SecureLogin Security System
             </small>
         </div>
     </div>
-</body>
-</html>
+</div>
+
+<!-- Auto-refresh warning -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show a warning if user tries to refresh too often
+    let refreshCount = sessionStorage.getItem('refreshCount') || 0;
+    refreshCount++;
+    sessionStorage.setItem('refreshCount', refreshCount);
+    
+    if (refreshCount > 3) {
+        const warningDiv = document.createElement('div');
+        warningDiv.className = 'alert alert-warning mt-3';
+        warningDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Notice:</strong> Repeated page refreshes may extend the restriction period. 
+            Please contact support instead of refreshing this page.
+        `;
+        document.querySelector('.banned-container').appendChild(warningDiv);
+    }
+    
+    // Add smooth animations
+    const container = document.querySelector('.banned-container');
+    container.style.opacity = '0';
+    container.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        container.style.transition = 'all 0.6s ease';
+        container.style.opacity = '1';
+        container.style.transform = 'translateY(0)';
+    }, 100);
+});
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Disable certain actions that might trigger more security alerts
+document.addEventListener('contextmenu', function(e) {
+    // Allow right-click but show a warning
+    console.log('Right-click detected on banned IP page');
+});
+
+// Track time on page for analytics
+let pageLoadTime = Date.now();
+window.addEventListener('beforeunload', function() {
+    let timeSpent = Date.now() - pageLoadTime;
+    console.log('Time spent on banned page:', Math.round(timeSpent / 1000), 'seconds');
+});
+</script>
+{% endblock %}

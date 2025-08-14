@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Bad Request - SecureLogin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>400 - Bad Request
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-circle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h2 class="text-danger mb-3">Oops! Bad Request</h2>
+                <p class="lead text-muted mb-4">
+                    The request you made is invalid or malformed. This could be due to:
+                </p>
+                <ul class="list-unstyled text-start mb-4">
+                    <li class="mb-2"><i class="fas fa-dot-circle text-danger me-2"></i>Invalid form data submitted</li>
+                    <li class="mb-2"><i class="fas fa-dot-circle text-danger me-2"></i>Missing required parameters</li>
+                    <li class="mb-2"><i class="fas fa-dot-circle text-danger me-2"></i>Corrupted request headers</li>
+                    <li class="mb-2"><i class="fas fa-dot-circle text-danger me-2"></i>Security validation failure</li>
+                </ul>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <button onclick="window.history.back()" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Go Back
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Go Home
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'authentication:dashboard' %}" class="btn btn-success">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Need Help?</strong> If you believe this is an error, please contact our support team.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Security Notice
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">
+                    <i class="fas fa-lock me-2 text-warning"></i>
+                    This incident has been logged for security purposes. Repeated bad requests may result in temporary access restrictions.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

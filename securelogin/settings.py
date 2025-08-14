@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
     'corsheaders',
+    'admin_honeypot',
     'authentication',
 ]
 
@@ -156,6 +157,13 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Custom Error Handlers
+handler400 = 'securelogin.error_views.bad_request_view'
+handler403 = 'securelogin.error_views.permission_denied_view'
+handler404 = 'securelogin.error_views.page_not_found_view'
+handler500 = 'securelogin.error_views.server_error_view'
+CSRF_FAILURE_VIEW = 'securelogin.error_views.csrf_failure_view'
 SECURE_HSTS_PRELOAD = True
 
 # Session Security
@@ -243,6 +251,11 @@ LOGGING = {
         'authentication': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
+            'propagate': True,
+        },
+        'securelogin.error_views': {
+            'handlers': ['file', 'console', 'security_file'],
+            'level': 'WARNING',
             'propagate': True,
         },
         'security': {
