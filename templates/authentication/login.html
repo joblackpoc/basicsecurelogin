@@ -58,6 +58,11 @@
                     </div>
                     
                     <div class="text-center">
+                        <p class="mb-2">
+                            <a href="{% url 'authentication:password_reset' %}" class="text-decoration-none">
+                                <i class="fas fa-key me-1"></i>Forgot your password?
+                            </a>
+                        </p>
                         <p class="mb-0">
                             Don't have an account? 
                             <a href="{% url 'authentication:register' %}" class="text-decoration-none">
