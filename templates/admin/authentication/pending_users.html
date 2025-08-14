@@ -1,0 +1,173 @@
+{% extends "admin/base_site.html" %}
+{% load admin_urls static admin_list %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django Admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='authentication' %}">Authentication</a>
+    &rsaquo; <a href="{% url 'admin:authentication_customuser_changelist' %}">Users</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h2>{{ title }}</h2>
+    
+    {% if pending_users %}
+        <form method="post" action="">
+            {% csrf_token %}
+            
+            <div class="actions">
+                <label>Action: 
+                    <select name="action" required>
+                        <option value="">---------</option>
+                        <option value="approve">Approve selected users</option>
+                        <option value="reject">Reject selected users</option>
+                    </select>
+                </label>
+                
+                <div id="rejection-reason" style="display: none; margin-top: 10px;">
+                    <label for="rejection_reason">Rejection Reason:</label>
+                    <textarea name="rejection_reason" rows="3" cols="50" placeholder="Optional reason for rejection..."></textarea>
+                </div>
+                
+                <button type="submit" class="default" title="Run the selected action">Go</button>
+            </div>
+            
+            <div class="results">
+                <table id="result_list">
+                    <thead>
+                        <tr>
+                            <th scope="col"><input type="checkbox" id="action-toggle"></th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Registration Date</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in pending_users %}
+                        <tr class="{% cycle 'row1' 'row2' %}">
+                            <td>
+                                <input type="checkbox" name="user_ids" value="{{ user.id }}" class="action-select">
+                            </td>
+                            <td>
+                                <a href="{% url 'admin:authentication_customuser_change' user.pk %}">{{ user.email }}</a>
+                            </td>
+                            <td>{{ user.first_name }} {{ user.last_name }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'admin:authentication_customuser_change' user.pk %}" class="viewlink">View Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+        
+        <p class="paginator">
+            {{ pending_users|length }} pending user{{ pending_users|length|pluralize }}
+        </p>
+    {% else %}
+        <p class="info">No pending users found. All registrations have been processed.</p>
+    {% endif %}
+</div>
+
+<div class="module">
+    <h3>Bulk Actions</h3>
+    <div class="form-row">
+        <div class="help">
+            <strong>Tips for User Management:</strong>
+            <ul>
+                <li>Review user details before approving accounts</li>
+                <li>Approved users will receive an email notification automatically</li>
+                <li>Use rejection reason to provide feedback to users</li>
+                <li>Monitor login attempts for security</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle action selector
+    const actionSelect = document.querySelector('select[name="action"]');
+    const rejectionReason = document.getElementById('rejection-reason');
+    
+    actionSelect.addEventListener('change', function() {
+        if (this.value === 'reject') {
+            rejectionReason.style.display = 'block';
+        } else {
+            rejectionReason.style.display = 'none';
+        }
+    });
+    
+    // Handle select all checkbox
+    const actionToggle = document.getElementById('action-toggle');
+    const actionSelects = document.querySelectorAll('.action-select');
+    
+    actionToggle.addEventListener('change', function() {
+        actionSelects.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+    
+    // Update select all based on individual checkboxes
+    actionSelects.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const allChecked = Array.from(actionSelects).every(cb => cb.checked);
+            const noneChecked = Array.from(actionSelects).every(cb => !cb.checked);
+            
+            if (allChecked) {
+                actionToggle.checked = true;
+                actionToggle.indeterminate = false;
+            } else if (noneChecked) {
+                actionToggle.checked = false;
+                actionToggle.indeterminate = false;
+            } else {
+                actionToggle.checked = false;
+                actionToggle.indeterminate = true;
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.info {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    color: #155724;
+    padding: 12px;
+    margin: 16px 0;
+}
+
+.actions {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.actions select, .actions button {
+    margin-right: 10px;
+}
+
+#rejection-reason textarea {
+    width: 100%;
+    max-width: 400px;
+    font-family: Arial, sans-serif;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+</style>
+{% endblock %}

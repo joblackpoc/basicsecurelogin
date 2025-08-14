@@ -207,6 +207,7 @@
                             </ul>
                         </li>
                         
+                        <!-- Replace the admin dropdown section in base.html with this: -->
                         {% if user.is_staff or user.is_superuser %}
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
@@ -216,10 +217,10 @@
                                     <li><a class="dropdown-item" href="/admin/">
                                         <i class="fas fa-home me-2"></i>Admin Panel
                                     </a></li>
-                                    <li><a class="dropdown-item" href="/admin/auth/customuser/pending-users/">
+                                    <li><a class="dropdown-item" href="/admin/authentication/customuser/pending-users/">
                                         <i class="fas fa-user-clock me-2 text-warning"></i>Pending Users
                                     </a></li>
-                                    <li><a class="dropdown-item" href="/admin/auth/customuser/security-dashboard/">
+                                    <li><a class="dropdown-item" href="/admin/authentication/customuser/security-dashboard/">
                                         <i class="fas fa-shield-alt me-2 text-info"></i>Security Dashboard
                                     </a></li>
                                     <li><a class="dropdown-item" href="/admin/authentication/bannedip/">
@@ -264,11 +265,12 @@
                         </h6>
                         <small>Manage users, security, and system settings</small>
                     </div>
+                    <!-- ALSO UPDATE the admin quick panel URLs: -->
                     <div class="col-md-4 text-md-end">
-                        <a href="/admin/auth/customuser/pending-users/" class="btn btn-light btn-sm me-2">
+                        <a href="/admin/authentication/customuser/pending-users/" class="btn btn-light btn-sm me-2">
                             <i class="fas fa-user-clock me-1"></i>Pending
                         </a>
-                        <a href="/admin/auth/customuser/security-dashboard/" class="btn btn-light btn-sm">
+                        <a href="/admin/authentication/customuser/security-dashboard/" class="btn btn-light btn-sm">
                             <i class="fas fa-shield-alt me-1"></i>Security
                         </a>
                     </div>

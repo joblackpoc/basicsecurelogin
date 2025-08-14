@@ -1,0 +1,405 @@
+{% extends "admin/base_site.html" %}
+{% load admin_urls static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django Admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='authentication' %}">Authentication</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>🛡️ {{ title }}</h1>
+    
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <h3>👥 Total Users</h3>
+            </div>
+            <div class="stat-number">{{ stats.total_users }}</div>
+            <div class="stat-description">Registered users</div>
+        </div>
+        
+        <div class="stat-card pending">
+            <div class="stat-header">
+                <h3>⏳ Pending Approvals</h3>
+            </div>
+            <div class="stat-number">{{ stats.pending_users }}</div>
+            <div class="stat-description">
+                <a href="{% url 'admin:auth_customuser_pending' %}">Awaiting approval</a>
+            </div>
+        </div>
+        
+        <div class="stat-card banned">
+            <div class="stat-header">
+                <h3>🚫 Banned Users</h3>
+            </div>
+            <div class="stat-number">{{ stats.banned_users }}</div>
+            <div class="stat-description">Currently banned</div>
+        </div>
+        
+        <div class="stat-card banned">
+            <div class="stat-header">
+                <h3>🔒 Banned IPs</h3>
+            </div>
+            <div class="stat-number">{{ stats.banned_ips }}</div>
+            <div class="stat-description">
+                <a href="{% url 'admin:authentication_bannedip_changelist' %}">Blocked addresses</a>
+            </div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-header">
+                <h3>✅ Successful Logins Today</h3>
+            </div>
+            <div class="stat-number">{{ stats.successful_logins_today }}</div>
+            <div class="stat-description">Today's successful logins</div>
+        </div>
+        
+        <div class="stat-card danger">
+            <div class="stat-header">
+                <h3>❌ Failed Logins Today</h3>
+            </div>
+            <div class="stat-number">{{ stats.failed_logins_today }}</div>
+            <div class="stat-description">Today's failed attempts</div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="module">
+        <h2>🚀 Quick Actions</h2>
+        <div class="actions-grid">
+            <a href="{% url 'admin:auth_customuser_pending' %}" class="action-button pending">
+                <strong>Review Pending Users</strong><br>
+                <small>Approve or reject user registrations</small>
+            </a>
+            <a href="{% url 'admin:authentication_bannedip_changelist' %}" class="action-button banned">
+                <strong>Manage IP Bans</strong><br>
+                <small>View and manage banned IP addresses</small>
+            </a>
+            <a href="{% url 'admin:auth_customuser_export_activities' %}" class="action-button export">
+                <strong>Export Security Logs</strong><br>
+                <small>Download user activity reports</small>
+            </a>
+            <a href="{% url 'admin:authentication_useractivity_changelist' %}" class="action-button activities">
+                <strong>View All Activities</strong><br>
+                <small>Browse complete audit trail</small>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Recent Activities -->
+    <div class="module">
+        <h2>📊 Recent User Activities</h2>
+        {% if recent_activities %}
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Time</th>
+                        <th>IP Address</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in recent_activities %}
+                    <tr class="activity-{{ activity.action|lower }}">
+                        <td>{{ activity.user.email }}</td>
+                        <td>
+                            <span class="action-badge action-{{ activity.action|lower }}">
+                                {{ activity.get_action_display }}
+                            </span>
+                        </td>
+                        <td>{{ activity.timestamp|date:"M d, H:i" }}</td>
+                        <td><code>{{ activity.ip_address|default:"N/A" }}</code></td>
+                        <td>{{ activity.details|default:"-"|truncatechars:50 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="info">No recent activities found.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Failed Login Attempts -->
+    <div class="module">
+        <h2>🔍 Recent Failed Login Attempts</h2>
+        {% if recent_failed_logins %}
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>IP Address</th>
+                        <th>Time</th>
+                        <th>User Agent</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in recent_failed_logins %}
+                    <tr>
+                        <td>{{ attempt.user_email }}</td>
+                        <td><code>{{ attempt.ip_address }}</code></td>
+                        <td>{{ attempt.timestamp|date:"M d, H:i" }}</td>
+                        <td>{{ attempt.user_agent|truncatechars:30 }}</td>
+                        <td>
+                            <a href="{% url 'admin:authentication_bannedip_add' %}?ip_address={{ attempt.ip_address }}" 
+                               class="ban-ip-link">Ban IP</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="success">No recent failed login attempts! 🎉</p>
+        {% endif %}
+    </div>
+    
+    <!-- Top Failed IPs -->
+    <div class="module">
+        <h2>🚨 Top IPs with Failed Attempts (Last 7 Days)</h2>
+        {% if failed_ips %}
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Failed Attempts</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ip_data in failed_ips %}
+                    <tr>
+                        <td><code>{{ ip_data.ip_address }}</code></td>
+                        <td>
+                            <span class="failed-count">{{ ip_data.count }}</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'admin:authentication_bannedip_add' %}?ip_address={{ ip_data.ip_address }}" 
+                               class="ban-ip-link">Ban IP</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="success">No suspicious IP activity detected! 🎉</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    padding: 20px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.stat-card.pending {
+    border-left: 4px solid #ffc107;
+}
+
+.stat-card.banned {
+    border-left: 4px solid #dc3545;
+}
+
+.stat-card.success {
+    border-left: 4px solid #28a745;
+}
+
+.stat-card.danger {
+    border-left: 4px solid #dc3545;
+}
+
+.stat-header h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+    margin: 10px 0;
+}
+
+.stat-description {
+    font-size: 12px;
+    color: #888;
+}
+
+.stat-description a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.action-button {
+    display: block;
+    padding: 15px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #333;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.action-button:hover {
+    background: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.action-button.pending {
+    border-left: 4px solid #ffc107;
+}
+
+.action-button.banned {
+    border-left: 4px solid #dc3545;
+}
+
+.action-button.export {
+    border-left: 4px solid #17a2b8;
+}
+
+.action-button.activities {
+    border-left: 4px solid #6f42c1;
+}
+
+.activity-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.activity-table th,
+.activity-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.activity-table th {
+    background: #f8f9fa;
+    font-weight: bold;
+}
+
+.action-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.action-login_success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.action-login_failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.action-logout {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.action-mfa_enabled {
+    background: #d4edda;
+    color: #155724;
+}
+
+.action-mfa_disabled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.action-user_banned {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.action-user_unbanned {
+    background: #d4edda;
+    color: #155724;
+}
+
+.failed-count {
+    background: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.ban-ip-link {
+    background: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.ban-ip-link:hover {
+    background: #c82333;
+}
+
+.info {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 4px;
+    color: #0c5460;
+    padding: 12px;
+    margin: 16px 0;
+}
+
+.success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    color: #155724;
+    padding: 12px;
+    margin: 16px 0;
+}
+</style>
+{% endblock %}
